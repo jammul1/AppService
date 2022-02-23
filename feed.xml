@@ -1,0 +1,814 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en_US"><generator uri="https://jekyllrb.com/" version="3.8.6">Jekyll</generator><link href="https://azure.github.io/AppService/feed.xml" rel="self" type="application/atom+xml" /><link href="https://azure.github.io/AppService/" rel="alternate" type="text/html" hreflang="en_US" /><updated>2022-02-23T00:08:58+00:00</updated><id>https://azure.github.io/AppService/feed.xml</id><title type="html">Azure App Service</title><subtitle>Announcements, updates, and release notes from the Azure App Service product team.</subtitle><author><name>Azure App Service</name></author><entry><title type="html">Planned Maintenance Notifications for Azure App Service</title><link href="https://azure.github.io/AppService/2022/02/01/App-Service-Planned-Notification-Feature.html" rel="alternate" type="text/html" title="Planned Maintenance Notifications for Azure App Service" /><published>2022-02-01T00:00:00+00:00</published><updated>2022-02-01T00:00:00+00:00</updated><id>https://azure.github.io/AppService/2022/02/01/App%20Service%20Planned%20Notification%20Feature</id><content type="html" xml:base="https://azure.github.io/AppService/2022/02/01/App-Service-Planned-Notification-Feature.html">&lt;p&gt;Azure App Service is regularly updated to provide new features, new runtime versions, performance improvements, and bug fixes. One of the top feature requests from our customers is the ability to receive notifications before one of the platform updates occurs. We are happy to announce that notifications for scheduled maintenance on Azure App Service are now available for App Service Environments (ASE) and multi-tenant applications.&lt;/p&gt;
+
+&lt;p&gt;With these notifications, you will be able to receive email or SMS text alerts before a platform upgrade starts, while it is in progress, and when the upgrade completes. We have also included a more advanced 7-day notification option allowing for more time to prepare for an upgrade. This 7-day notification will alert customers to an upcoming platform upgrade approximately 1 week before the event begins. You can also invoke Azure Functions or Logic Apps based on these notifications. This feature has been rolled out for App Service Environments and shared multi-tenant environments across our regions. This article shows how to set up email and SMS alerts, as well as Function and Logic Apps, to consume these events.&lt;/p&gt;
+
+&lt;h2 id=&quot;overview&quot;&gt;Overview&lt;/h2&gt;
+
+&lt;p&gt;The maintenance notifications for App Service are surfaced as events in Azure Monitor. This means that you can set up your email address and/or SMS phone number when a notification is generated. You can also set up a trigger for your custom Azure Function or Logic App, which allows you to automatically take action to your resources. For example, you can automatically divert all the traffic from your App Service Environment in one region which will be upgraded to an App Service Environment in another region in order to avoid any potential impact. Then, you can automatically change the traffic back to normal when an upgrade completes. Please refer to the &lt;a href=&quot;https://github.com/Azure-Samples/azure-logic-app-traffic-update-samples&quot;&gt;Logic App sample for automatic traffic diversion for Azure App Service&lt;/a&gt; for more details.&lt;/p&gt;
+
+&lt;h2 id=&quot;viewing-upgrade-notifications&quot;&gt;Viewing upgrade notifications&lt;/h2&gt;
+
+&lt;p&gt;From the Azure portal, go to &lt;strong&gt;Home&lt;/strong&gt; &amp;gt; &lt;strong&gt;Monitor&lt;/strong&gt; &amp;gt; &lt;strong&gt;Service Health&lt;/strong&gt; &amp;gt; &lt;strong&gt;Planned maintenance&lt;/strong&gt;. Here you can see all active (including upcoming or in-progress) notifications for the selected subscriptions. To make it easy to find App Service upgrade events, click the &lt;strong&gt;Service&lt;/strong&gt; box, check all App Service types and uncheck everything else. To see past notifications, navigate to &lt;strong&gt;Health history&lt;/strong&gt; and filter &lt;strong&gt;Planned maintenance&lt;/strong&gt; from the Health Event Type box.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/AppService/media/2022/02/upgradenotification.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;setting-up-alerts&quot;&gt;Setting up alerts&lt;/h2&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Open &lt;strong&gt;Azure portal&lt;/strong&gt;, sign in with your credentials.&lt;/li&gt;
+  &lt;li&gt;Search for the icon named &lt;strong&gt;Monitor&lt;/strong&gt; and click it. If you cannot see it, click the arrow on the right to show &lt;strong&gt;All services&lt;/strong&gt;, then search Monitor.&lt;/li&gt;
+  &lt;li&gt;In the left menu items, click &lt;strong&gt;Alerts&lt;/strong&gt;.&lt;/li&gt;
+  &lt;li&gt;Click &lt;strong&gt;Service Health&lt;/strong&gt;.&lt;/li&gt;
+  &lt;li&gt;Click &lt;strong&gt;Add service health alert&lt;/strong&gt; at the top center.&lt;/li&gt;
+  &lt;li&gt;In the Condition section, choose the subscription that owns your App Service Environment(s).&lt;/li&gt;
+  &lt;li&gt;At the Service(s) box, choose all items starting with App Service:
+    &lt;ol&gt;
+      &lt;li&gt;App Service&lt;/li&gt;
+      &lt;li&gt;App Service \ Web Apps&lt;/li&gt;
+      &lt;li&gt;App Service (Linux)&lt;/li&gt;
+      &lt;li&gt;App Service (Linux) \ Web App for Containers&lt;/li&gt;
+      &lt;li&gt;App Service (Linux) \ Web App&lt;/li&gt;
+    &lt;/ol&gt;
+  &lt;/li&gt;
+  &lt;li&gt;At the Region(s) box, make sure to check the regions of the App Service Environment(s).&lt;/li&gt;
+  &lt;li&gt;At the Event type box, check &lt;strong&gt;Planned maintenance&lt;/strong&gt;.&lt;/li&gt;
+  &lt;li&gt;In the Actions section, click &lt;strong&gt;Add action groups&lt;/strong&gt;.&lt;/li&gt;
+  &lt;li&gt;Click &lt;strong&gt;Create alert rule&lt;/strong&gt;.&lt;/li&gt;
+  &lt;li&gt;Select a subscription that your App Service Environment belongs to.&lt;/li&gt;
+  &lt;li&gt;Choose a resource group and name an action group. Set Display name to something you can easily identify the action for (&lt;strong&gt;IMPORTANT&lt;/strong&gt;: The display name will be shown in every email/SMS/post of the notifications).&lt;/li&gt;
+  &lt;li&gt;&lt;em&gt;If you want to receive text notifications&lt;/em&gt;, in the Notifications section, choose &lt;strong&gt;Email/SMS message/Push/Voice&lt;/strong&gt; at the Notification type. Then choose output channels you need (For example, Email or SMS.) Put email addresses or phone numbers as necessary.&lt;/li&gt;
+  &lt;li&gt;&lt;em&gt;If you want to hook up your custom automation&lt;/em&gt;, in the Actions section, choose &lt;strong&gt;Azure Function&lt;/strong&gt; or &lt;strong&gt;Logic App&lt;/strong&gt; at the Action type. Put a name into the Name. Select your app.&lt;/li&gt;
+  &lt;li&gt;Press &lt;strong&gt;Save changes&lt;/strong&gt;. The page will go back to the Rules management page.&lt;/li&gt;
+  &lt;li&gt;In the Alert rule details section, set a name.&lt;/li&gt;
+  &lt;li&gt;Click &lt;strong&gt;Save&lt;/strong&gt;.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&quot;more-resources&quot;&gt;More resources&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://docs.microsoft.com/azure/azure-monitor/&quot;&gt;Azure Monitor documentation&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://docs.microsoft.com/azure/azure-monitor/alerts/alerts-common-schema-definitions&quot;&gt;Common alert schema definitions&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/Azure-Samples/azure-logic-app-traffic-update-samples&quot;&gt;Logic App sample for automatic traffic diversion for Azure App Service&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;faq&quot;&gt;FAQ&lt;/h2&gt;
+
+&lt;p&gt;&lt;strong&gt;When do you send the upgrade notifications?&lt;/strong&gt;&lt;br /&gt;
+The first notifications will be created about 7 days before an actual upgrade operation starts. A notification is then sent 60-90 minutes before maintenance starts and then again once upgrades are underway.&lt;/p&gt;
+
+&lt;p&gt;Once the upgrade starts, we send in-progress notifications every 12 hours until the operation completes. After it has finished, we send a notification of completion.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Can I invoke my Azure Function when a notification comes?&lt;/strong&gt;&lt;br /&gt;
+Yes, you can set up action to trigger your Azure Function or Logic App. Please see &lt;a href=&quot;https://github.com/Azure-Samples/azure-logic-app-traffic-update-samples&quot;&gt;Logic App sample for automatic traffic diversion for Azure App Service&lt;/a&gt; as an example.&lt;/p&gt;
+
+&lt;p&gt;To see the data format of the notifications, refer to &lt;a href=&quot;https://docs.microsoft.com/azure/azure-monitor/alerts/alerts-common-schema-definitions&quot;&gt;Common alert schema definitions&lt;/a&gt;.&lt;/p&gt;</content><author><name>Azure App Service</name></author><category term="diagnostics" /><summary type="html">Azure App Service is regularly updated to provide new features, new runtime versions, performance improvements, and bug fixes. One of the top feature requests from our customers is the ability to receive notifications before one of the platform updates occurs. We are happy to announce that notifications for scheduled maintenance on Azure App Service are now available for App Service Environments (ASE) and multi-tenant applications.</summary></entry><entry><title type="html">App Service Environment v3 Migration Feature Public Preview</title><link href="https://azure.github.io/AppService/2022/01/18/ASE-migration-feature-public-preview.html" rel="alternate" type="text/html" title="App Service Environment v3 Migration Feature Public Preview" /><published>2022-01-18T00:00:00+00:00</published><updated>2022-01-18T00:00:00+00:00</updated><id>https://azure.github.io/AppService/2022/01/18/ASE-migration-feature-public-preview</id><content type="html" xml:base="https://azure.github.io/AppService/2022/01/18/ASE-migration-feature-public-preview.html">&lt;p&gt;We are happy to announce the availability of the public preview of the &lt;a href=&quot;https://aka.ms/asemigration&quot;&gt;App Service Environment (ASE) v3 migration feature&lt;/a&gt;. With this feature, you’ll be able to migrate your existing ASE as well as the apps running on that ASE to &lt;a href=&quot;https://docs.microsoft.com/azure/app-service/environment/overview&quot;&gt;ASEv3&lt;/a&gt;. ASEv3 provides a number of &lt;a href=&quot;https://docs.microsoft.com/azure/app-service/environment/overview#feature-differences&quot;&gt;feature differences&lt;/a&gt; as well as performance enhancements and &lt;a href=&quot;https://docs.microsoft.com/azure/app-service/environment/overview#pricing&quot;&gt;potential reduced overall costs&lt;/a&gt; compared to previous versions. To get a complete overview on ASEv3, read the ASEv3 focused &lt;a href=&quot;https://docs.microsoft.com/azure/app-service/environment/overview&quot;&gt;App Service Environment overview&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Check out the following docs to learn more about migrating to ASEv3:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://aka.ms/asemigration&quot;&gt;Migrate to App Service Environment v3&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://aka.ms/asemigrationhowto&quot;&gt;How to Migrate to ASEv3&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;&lt;strong&gt;NOTE&lt;/strong&gt;&lt;br /&gt;
+At this time, the public preview supports a subset of possible ASE configurations. Be sure to review the supported scenarios to see if you can migrate at this time using the feature and stay tuned for updates as we release additional capabilities.&lt;/p&gt;
+
+&lt;/blockquote&gt;
+
+&lt;p&gt;An Azure portal experience for migration will be available at the start of February, 2022. Be on the lookout for additional announcements.&lt;/p&gt;
+
+&lt;p&gt;If your ASE &lt;a href=&quot;https://aka.ms/asemigration#preview-limitations&quot;&gt;isn’t supported for migration&lt;/a&gt; using the migration feature and your ASE isn’t listed under one of the &lt;a href=&quot;https://aka.ms/asemigration#preview-limitations&quot;&gt;upcoming supported scenarios&lt;/a&gt;, you have the option to migrate to ASEv3 manually. See the &lt;a href=&quot;https://aka.ms/asemigrationalternatives&quot;&gt;migration alternatives&lt;/a&gt; for more details.&lt;/p&gt;</content><author><name>Azure App Service</name></author><category term="networking" /><summary type="html">We are happy to announce the availability of the public preview of the App Service Environment (ASE) v3 migration feature. With this feature, you’ll be able to migrate your existing ASE as well as the apps running on that ASE to ASEv3. ASEv3 provides a number of feature differences as well as performance enhancements and potential reduced overall costs compared to previous versions. To get a complete overview on ASEv3, read the ASEv3 focused App Service Environment overview.</summary></entry><entry><title type="html">Azure App Service and Azure Functions on Azure Stack Hub 2021 Q3 Released</title><link href="https://azure.github.io/AppService/2021/12/10/App-Service-on-Azure-Stack-Hub-2021-Q3-Update-Released.html" rel="alternate" type="text/html" title="Azure App Service and Azure Functions on Azure Stack Hub 2021 Q3 Released" /><published>2021-12-10T00:00:00+00:00</published><updated>2021-12-10T00:00:00+00:00</updated><id>https://azure.github.io/AppService/2021/12/10/App%20Service%20on%20Azure%20Stack%20Hub%202021%20Q3%20Update%20Released</id><content type="html" xml:base="https://azure.github.io/AppService/2021/12/10/App-Service-on-Azure-Stack-Hub-2021-Q3-Update-Released.html">&lt;p&gt;The 2021 Q3 update to Azure App Service on Azure Stack Hub is now available. This release updates the resource provider and brings the following key capabilities and fixes:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Updates to &lt;strong&gt;App Service Tenant, Admin, Functions portals and Kudu tools&lt;/strong&gt;. Consistent with Azure Stack Portal SDK version.&lt;/li&gt;
+  &lt;li&gt;Updates to core service to improve reliability and error messaging enabling easier diagnosis of common issues.&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Updates to the following application frameworks and tools&lt;/strong&gt;:
+    &lt;ul&gt;
+      &lt;li&gt;ASP.NET Core
+        &lt;ul&gt;
+          &lt;li&gt;3.1.16&lt;/li&gt;
+          &lt;li&gt;5.0.7&lt;/li&gt;
+          &lt;li&gt;6.0.0&lt;/li&gt;
+        &lt;/ul&gt;
+      &lt;/li&gt;
+      &lt;li&gt;Azul OpenJDK
+        &lt;ul&gt;
+          &lt;li&gt;8.52.0.23&lt;/li&gt;
+          &lt;li&gt;11.44.13&lt;/li&gt;
+        &lt;/ul&gt;
+      &lt;/li&gt;
+      &lt;li&gt;Git 2.33.1.1&lt;/li&gt;
+      &lt;li&gt;NodeJS
+        &lt;ul&gt;
+          &lt;li&gt;10.15.2&lt;/li&gt;
+          &lt;li&gt;10.16.3&lt;/li&gt;
+          &lt;li&gt;10.19.0&lt;/li&gt;
+          &lt;li&gt;12.21.0&lt;/li&gt;
+          &lt;li&gt;14.15.1&lt;/li&gt;
+          &lt;li&gt;14.16.0&lt;/li&gt;
+        &lt;/ul&gt;
+      &lt;/li&gt;
+      &lt;li&gt;NPM
+        &lt;ul&gt;
+          &lt;li&gt;6.14.11&lt;/li&gt;
+        &lt;/ul&gt;
+      &lt;/li&gt;
+      &lt;li&gt;PHP
+        &lt;ul&gt;
+          &lt;li&gt;7.2.34&lt;/li&gt;
+          &lt;li&gt;7.3.27&lt;/li&gt;
+          &lt;li&gt;7.14.15&lt;/li&gt;
+        &lt;/ul&gt;
+      &lt;/li&gt;
+      &lt;li&gt;Tomcat
+        &lt;ul&gt;
+          &lt;li&gt;8.5.58&lt;/li&gt;
+          &lt;li&gt;9.0.38&lt;/li&gt;
+        &lt;/ul&gt;
+      &lt;/li&gt;
+      &lt;li&gt;Updated Kudu to 94.30524.5227&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Updates to underlying operating system of all roles&lt;/strong&gt;:
+    &lt;ul&gt;
+      &lt;li&gt;&lt;a href=&quot;https://support.microsoft.com/help/5007192&quot;&gt;2021-11 Cumulative Update for Windows Server 2016 for x64-based Systems (KB5007192)&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href=&quot;https://support.microsoft.com/help/5005698&quot;&gt;2021-09 Servicing Stack Update for Windows Server 2016 for x64-based Systems (KB5005698)&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;Defender Definition 1.353.743.0&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;strong&gt;Cumulative Updates for Windows Server are now applied to Controller roles as part of deployment and upgrade&lt;/strong&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;All other fixes and updates are detailed in the &lt;a href=&quot;https://docs.microsoft.com/azure-stack/operator/app-service-release-notes-2021-q3?view=azs-2108&quot;&gt;App Service on Azure Stack Hub 2021 Q3 Release Notes&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;The App Service on Azure Stack Hub 2021.Q3 build number is &lt;strong&gt;95.1.1.539&lt;/strong&gt; and requires Azure Stack Hub to be updated with 2108 prior to deployment/upgrade.&lt;/p&gt;
+
+&lt;p&gt;Please review the &lt;a href=&quot;https://docs.microsoft.com/azure-stack/operator/app-service-release-notes-2021-Q3&quot;&gt;&lt;strong&gt;release notes and all known issues&lt;/strong&gt;&lt;/a&gt; prior to updating your installation of Azure App Service on Azure Stack Hub.&lt;/p&gt;
+
+&lt;p&gt;You can download the new installer and helper scripts:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://aka.ms/appsvcupdate21q3installer&quot;&gt;Installer&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://aka.ms/appsvconmashelpers&quot;&gt;Helper Scripts&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Please read the updated documentation prior to getting started with deployment:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://docs.microsoft.com/azure-stack/operator/app-service-release-notes-2021-Q3&quot;&gt;2021 Q3 Update Release Notes&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://docs.microsoft.com/azure-stack/operator/azure-stack-app-service-before-you-get-started&quot;&gt;Prerequisites for deploying App Service on Azure Stack Hub&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://docs.microsoft.com/azure-stack/operator/azure-stack-app-service-deploy&quot;&gt;Deploy the App Service Resource Provider&lt;/a&gt; for new deployments&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://docs.microsoft.com/azure-stack/operator/azure-stack-app-service-update&quot;&gt;Update the App Service Resource Provider&lt;/a&gt; for updating existing deployments&lt;/li&gt;
+&lt;/ul&gt;</content><author><name>Azure App Service</name></author><category term="Azure Stack" /><summary type="html">The 2021 Q3 update to Azure App Service on Azure Stack Hub is now available. This release updates the resource provider and brings the following key capabilities and fixes: Updates to App Service Tenant, Admin, Functions portals and Kudu tools. Consistent with Azure Stack Portal SDK version. Updates to core service to improve reliability and error messaging enabling easier diagnosis of common issues. Updates to the following application frameworks and tools: ASP.NET Core 3.1.16 5.0.7 6.0.0 Azul OpenJDK 8.52.0.23 11.44.13 Git 2.33.1.1 NodeJS 10.15.2 10.16.3 10.19.0 12.21.0 14.15.1 14.16.0 NPM 6.14.11 PHP 7.2.34 7.3.27 7.14.15 Tomcat 8.5.58 9.0.38 Updated Kudu to 94.30524.5227 Updates to underlying operating system of all roles: 2021-11 Cumulative Update for Windows Server 2016 for x64-based Systems (KB5007192) 2021-09 Servicing Stack Update for Windows Server 2016 for x64-based Systems (KB5005698) Defender Definition 1.353.743.0 Cumulative Updates for Windows Server are now applied to Controller roles as part of deployment and upgrade All other fixes and updates are detailed in the App Service on Azure Stack Hub 2021 Q3 Release Notes The App Service on Azure Stack Hub 2021.Q3 build number is 95.1.1.539 and requires Azure Stack Hub to be updated with 2108 prior to deployment/upgrade. Please review the release notes and all known issues prior to updating your installation of Azure App Service on Azure Stack Hub. You can download the new installer and helper scripts: Installer Helper Scripts Please read the updated documentation prior to getting started with deployment: 2021 Q3 Update Release Notes Prerequisites for deploying App Service on Azure Stack Hub Deploy the App Service Resource Provider for new deployments Update the App Service Resource Provider for updating existing deployments</summary></entry><entry><title type="html">Upcoming Change to App Service Certificate on November 30 2021</title><link href="https://azure.github.io/AppService/2021/11/22/ASC-1130-Change.html" rel="alternate" type="text/html" title="Upcoming Change to App Service Certificate on November 30 2021" /><published>2021-11-22T00:00:00+00:00</published><updated>2021-11-22T00:00:00+00:00</updated><id>https://azure.github.io/AppService/2021/11/22/ASC-1130-Change</id><content type="html" xml:base="https://azure.github.io/AppService/2021/11/22/ASC-1130-Change.html">&lt;p&gt;Starting November 30 2021, GoDaddy will no longer be issuing certificates for the additional ‘www’ domain when validating domain ownership through HTML web page verification (AKA token verification) method or the App Service verification, which automates token verification method. This change will affect all certificates (new, renew, rekey) that require validation.&lt;/p&gt;
+
+&lt;p&gt;This article will go through the following sections to provide you more information on how to handle your certificate renewals to avoid any possible downtime for your web app when using an App Service Certificate.&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;&lt;a href=&quot;#understanding-different-validation-methods&quot;&gt;Understanding different validation methods&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;#what-change-can-mean-for-ssl-bindings&quot;&gt;What change can mean for SSL bindings&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;#how-to-get-certificate-issued-for-a-www-domain&quot;&gt;How to get certificate issued for a ‘www’ domain&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&quot;understanding-different-validation-methods&quot;&gt;Understanding different validation methods&lt;/h2&gt;
+
+&lt;p&gt;You can refer to the &lt;a href=&quot;https://docs.microsoft.com/azure/app-service/configure-ssl-certificate#verify-domain-ownership&quot;&gt;verify domain ownership documentation&lt;/a&gt; for the different methods to verify domain ownership for your App Service Certificate.&lt;/p&gt;
+
+&lt;h2 id=&quot;what-change-can-mean-for-ssl-bindings&quot;&gt;What change can mean for SSL bindings&lt;/h2&gt;
+
+&lt;p&gt;If you renew your certificate without a ‘www’ domain, this may affect your SSL bindings if you use an App Service Certificate for your ‘www’ domain.&lt;/p&gt;
+
+&lt;p&gt;Let’s say you already added a ‘www’ custom domain to your web app and have already added an SSL binding with an App Service Certificate that secures a ‘www’ domain. If you renewed your certificate without a ‘www’ domain, your SSL bindings CANNOT be updated/synced with that new certificate. Thus you are risking your SSL bindings to keep using the old certificate.&lt;/p&gt;
+
+&lt;p&gt;To avoid this issue, do NOT use HTML web page verification or App Service Verification. Use either the mail verification or the manual DNS verification instead. Refert to &lt;a href=&quot;#how-to-get-certificate-issued-for-a-www-domain&quot;&gt;how to get certificate issued for a ‘www’ domain&lt;/a&gt; section of the article.&lt;/p&gt;
+
+&lt;h2 id=&quot;how-to-get-certificate-issued-for-a-www-domain&quot;&gt;How to get certificate issued for a ‘www’ domain&lt;/h2&gt;
+
+&lt;p&gt;You may still get a certificate with ‘www’ domain when you verify your domain ownership with DNS manual verification or mail verification.&lt;/p&gt;
+
+&lt;h3 id=&quot;dns-manual-verification&quot;&gt;DNS manual verification&lt;/h3&gt;
+
+&lt;p&gt;You will need to create a TXT record using the token verification token in your domain name’s zone (DNS) records.&lt;/p&gt;
+
+&lt;h3 id=&quot;mail-verification&quot;&gt;Mail verification&lt;/h3&gt;
+
+&lt;p&gt;An email will be sent to the domain administrators with instructions on how to verify domain ownership for your certificate.&lt;/p&gt;
+
+&lt;p&gt;For example, if the certificate is for &lt;code class=&quot;highlighter-rouge&quot;&gt;domain.com&lt;/code&gt;, emails will be sent to:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;admin@domain.com
+administrator@domain.com
+hostmaster@domain.com
+postmaster@domain.com
+webmaster@domain.com
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;</content><author><name>Azure App Service</name></author><category term="certsdomains" /><summary type="html">Starting November 30 2021, GoDaddy will no longer be issuing certificates for the additional ‘www’ domain when validating domain ownership through HTML web page verification (AKA token verification) method or the App Service verification, which automates token verification method. This change will affect all certificates (new, renew, rekey) that require validation.</summary></entry><entry><title type="html">.NET 6 on App Service</title><link href="https://azure.github.io/AppService/2021/11/08/Dot.Net6.on.App.Service.html" rel="alternate" type="text/html" title=".NET 6 on App Service" /><published>2021-11-08T00:00:00+00:00</published><updated>2021-11-08T00:00:00+00:00</updated><id>https://azure.github.io/AppService/2021/11/08/Dot.Net6.on.App.Service</id><content type="html" xml:base="https://azure.github.io/AppService/2021/11/08/Dot.Net6.on.App.Service.html">&lt;p&gt;We are happy to announce that App Service is rolling out &lt;em&gt;day 0&lt;/em&gt; support for &lt;strong&gt;.NET 6.0&lt;/strong&gt; applications across all public regions and scenarios on both Windows and Linux App Service plans.&lt;/p&gt;
+
+&lt;p&gt;The App Service and .NET teams worked closely together to deliver this functionality on the same day as .NET 6.0 reached GA (&lt;a href=&quot;https://devblogs.microsoft.com/dotnet/announcing-net-6/&quot;&gt;see .NET 6.0 GA announcement&lt;/a&gt;). Day 0 support for .NET 6.0 GA delivers on the promise made last year during &lt;a href=&quot;https://azure.github.io/AppService/2020/11/10/Dot-Net-5-on-App-Service.html&quot;&gt;.NET 5.0 GA announcement.&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Joining the party this year with &lt;em&gt;day 0&lt;/em&gt; support are:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://go.microsoft.com/fwlink/?linkid=2178604&quot;&gt;Azure Functions&lt;/a&gt; where you can host serverless functions using Functions Runtime v4.&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://go.microsoft.com/fwlink/?linkid=2178605&quot;&gt;Azure Static Web Apps&lt;/a&gt; that supports full-stack .NET 6.0 applications with Blazor WebAssembly frontends and Azure Functions APIs.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;To achieve &lt;em&gt;day 0&lt;/em&gt; support across all scenarios we continue to leverage the &lt;strong&gt;Early Access&lt;/strong&gt; mechanism to seed and distribute the new runtime globally: &lt;a href=&quot;https://aka.ms/app-service-early-access&quot;&gt;Learn more about App Service Early Access.&lt;/a&gt;. The early access release will be followed by additional deployments to fully integrate the new bits across our fleet expecting to be fully done by the end of the week.&lt;/p&gt;
+
+&lt;p&gt;If you already have an app targeting and earlier preview of .NET 6.0 on the platform, there is no need to take action as the new runtime will be picked up on the next application restart once the update is available for your app. You can trigger this manually by starting and stopping your app.&lt;/p&gt;
+
+&lt;p&gt;If you want to learn more, be sure to checkout our session during &lt;a href=&quot;https://www.dotnetconf.net/agenda&quot;&gt;.NET Conf 2021&lt;/a&gt;. Wednesday 11/10 @ 9:30am PST &lt;a href=&quot;https://twitter.com/bktv99&quot;&gt;@bktv99&lt;/a&gt; will be taking the stage to show you “6 ways to get started with .NET 6.0 and App Service”.&lt;/p&gt;</content><author><name>Azure App Service</name></author><category term="dotnet" /><summary type="html">We are happy to announce that App Service is rolling out day 0 support for .NET 6.0 applications across all public regions and scenarios on both Windows and Linux App Service plans.</summary></entry><entry><title type="html">General availability of Diagnostics tools for App Service on Linux .NET core apps</title><link href="https://azure.github.io/AppService/2021/11/01/Diagnostic-Tools-for-ASP-NET-Core-Linux-apps-are-now-publicly-available.html" rel="alternate" type="text/html" title="General availability of Diagnostics tools for App Service on Linux .NET core apps" /><published>2021-11-01T00:00:00+00:00</published><updated>2021-11-01T00:00:00+00:00</updated><id>https://azure.github.io/AppService/2021/11/01/Diagnostic-Tools-for-ASP-NET-Core-Linux-apps-are-now-publicly-available</id><content type="html" xml:base="https://azure.github.io/AppService/2021/11/01/Diagnostic-Tools-for-ASP-NET-Core-Linux-apps-are-now-publicly-available.html">&lt;p&gt;We are pleased to announce the public availability of Diagnostic tools for App Services Linux for .NET Core apps. With this capability, we now offer built-in support for collecting deep diagnostic artifacts that can help you debug application code issues. These artifacts include memory dumps and profiler traces. These tools empower developers to diagnose a variety of .NET code scenarios on Linux including:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Slow performance&lt;/li&gt;
+  &lt;li&gt;High memory&lt;/li&gt;
+  &lt;li&gt;High CPU&lt;/li&gt;
+  &lt;li&gt;Runtime errors and exceptions&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;These tools enable you to self-diagnose your apps to identify if application code is contributing to the problem.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;This tools are enabled with the &lt;strong&gt;latest Azure App Service platform update (96)&lt;/strong&gt;. To check the current platform version for you linux app, please check the environment variable &lt;strong&gt;PLATFORM_VERSION&lt;/strong&gt; from the &lt;a href=&quot;https://docs.microsoft.com/azure/app-service/resources-kudu&quot;&gt;kudu console&lt;/a&gt; for your app.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h2 id=&quot;collection-in-diagnose-and-solve&quot;&gt;Collection in Diagnose and Solve&lt;/h2&gt;
+
+&lt;p&gt;To access these new capabilities on your .NET Core apps hosted in Linux, navigate to the &lt;strong&gt;Diagnose and Solve&lt;/strong&gt; Blade &amp;gt; &lt;strong&gt;Diagnostics Tools&lt;/strong&gt; and select either &lt;strong&gt;Collect .NET Profiler Trace&lt;/strong&gt; or &lt;strong&gt;Collect Memory Dump&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/AppService/media/2021/10/linux-diagnostic-tools.png&quot; alt=&quot;Linux Diagnostic Tools&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;collection-in-kudu&quot;&gt;Collection in Kudu&lt;/h2&gt;
+
+&lt;p&gt;The &lt;a href=&quot;https://docs.microsoft.com/azure/app-service/resources-kudu&quot;&gt;Kudu console&lt;/a&gt; for Linux app services has been updated to include new collection options for memory dumps and profiles on the Process Explorer page.&lt;/p&gt;
+
+&lt;p&gt;To navigate to this new Kudu experience use the following (update &amp;lt;&lt;strong&gt;mysite&lt;/strong&gt;&amp;gt; with your app name): https://&amp;lt;&lt;strong&gt;mysite&lt;/strong&gt;&amp;gt;.scm.azurewebsites.net/&lt;strong&gt;newui&lt;/strong&gt; to check out the new experience.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/AppService/media/2021/10/kudu-process-explorer-linux.png&quot; alt=&quot;Process Explorer in Kudu&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;When you select the &lt;em&gt;Process Explorer&lt;/em&gt; page, you can identify the process you want to debug. Use the drop-downs to select the type of memory dump and click &lt;strong&gt;Collect Dump&lt;/strong&gt;. Alternatively, you can select the length of a profile from the drop-down and click &lt;strong&gt;Start Profiling&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;h2 id=&quot;analyzing-the-problem&quot;&gt;Analyzing the problem&lt;/h2&gt;
+
+&lt;p&gt;With the latest version of &lt;a href=&quot;https://devblogs.microsoft.com/visualstudio/linux-managed-memory-dump-debugging/&quot;&gt;Visual Studio&lt;/a&gt;, you now have the ability to open and analyze managed dumps collected on Linux and use the best in class debugging tools available in Visual Studio!&lt;/p&gt;
+
+&lt;h3 id=&quot;opening-managed-linux-core-dumps-in-visual-studio&quot;&gt;Opening managed Linux Core dumps in Visual Studio&lt;/h3&gt;
+
+&lt;p&gt;Memory dumps created on Windows machines have well-known extension (*.dmp) and thus have a straightforward association with your favorite memory analysis tools. By default, core dumps produced on Linux machines are created without an extension.&lt;/p&gt;
+
+&lt;p&gt;If your managed core dump doesn’t have an extension you can use the &lt;strong&gt;Open File&lt;/strong&gt; dialogue, or drag and drop the file into your IDE, and Visual Studio will automatically identify and open it as a Linux core managed memory dump.&lt;/p&gt;
+
+&lt;p&gt;However, if the file was renamed to include the Windows dump extension (*.dmp) then use Visual Studio’s “Open with” feature in the “Open File” dialogue box, &lt;a href=&quot;https://devblogs.microsoft.com/visualstudio/linux-managed-memory-dump-debugging/#opening-the-linux-core-dump-in-visual-studio&quot;&gt;more details here&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h3 id=&quot;linux-core-dump-file-summary&quot;&gt;Linux Core Dump File Summary&lt;/h3&gt;
+
+&lt;p&gt;Once opened the &lt;strong&gt;Managed Linux Core Dump File Summary&lt;/strong&gt; window shows a summary and module information for the dump file, and a list of &lt;strong&gt;Actions&lt;/strong&gt; you can take, this remains consistent with existing dump handling experiences in Visual Studio.
+&lt;img src=&quot;/AppService/media/2021/10/vs-dump-file-summary-linux-dump.png&quot; alt=&quot;Managed Linux Core Dump File Summary&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;To start debugging, select &lt;strong&gt;Debug with Managed Only&lt;/strong&gt; from the &lt;strong&gt;Actions&lt;/strong&gt; section of the summary page and start using the awesome debugging tools you have become accustomed to.&lt;/p&gt;
+
+&lt;p&gt;You could, for example, start by reviewing the list of Threads or Tasks using the &lt;a href=&quot;https://docs.microsoft.com/visualstudio/debugger/using-the-parallel-stacks-window&quot;&gt;Parallel Stacks&lt;/a&gt; window. Or dig a bit deeper by switching between threads and examining the most interesting frames from the &lt;a href=&quot;https://docs.microsoft.com/visualstudio/debugger/how-to-use-the-call-stack-window&quot;&gt;Calls Stacks&lt;/a&gt; view. You might then examine the value and state of variables using the &lt;a href=&quot;https://docs.microsoft.com/visualstudio/debugger/autos-and-locals-windows&quot;&gt;Locals or Autos window&lt;/a&gt;. Essentially you get to examine every detail of the process just as if you set a breakpoint in your managed code on Linux.&lt;/p&gt;
+
+&lt;h3 id=&quot;diagnostics-analysis&quot;&gt;Diagnostics Analysis&lt;/h3&gt;
+
+&lt;p&gt;Visual Studio has also developed a set of analyzers to help identify the key signals in your memory dump that might indicate a problem with your production service. Visual Studio currently supports the following Analyzers with new and improved analysis coming in the very near future:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;CLR thread pool&lt;/li&gt;
+  &lt;li&gt;Sync over async&lt;/li&gt;
+  &lt;li&gt;Deadlock detection&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;img src=&quot;/AppService/media/2021/10/vs-diagnostics-analysis.png&quot; alt=&quot;Visual Studio Diagnsostics Analysis&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;More details on &lt;a href=&quot;https://devblogs.microsoft.com/visualstudio/managed-memory-dump-analyzers/#automatic-analysis-of-a-memory-dump&quot;&gt;running analysis against managed Linux memory dump here&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+
+&lt;p&gt;In our Azure PaaS offerings, we continue to invest in a comprehensive diagnostics experience that helps you maximize your investment in Azure PaaS. We are excited to open up new debugging opportunities for deep diagnostics artifacts that will help you analyze the health of a broad and complex range of services.&lt;/p&gt;</content><author><name>Azure App Service</name></author><category term="networking" /><summary type="html">We are pleased to announce the public availability of Diagnostic tools for App Services Linux for .NET Core apps. With this capability, we now offer built-in support for collecting deep diagnostic artifacts that can help you debug application code issues. These artifacts include memory dumps and profiler traces. These tools empower developers to diagnose a variety of .NET code scenarios on Linux including:</summary></entry><entry><title type="html">How-to setup Continuous Deployment using ACR Tasks with Windows containers</title><link href="https://azure.github.io/AppService/2021/11/01/how-to-setup-continuous-deployment-using-acr-tasks-with-windows-containers.html" rel="alternate" type="text/html" title="How-to setup Continuous Deployment using ACR Tasks with Windows containers" /><published>2021-11-01T00:00:00+00:00</published><updated>2021-11-01T00:00:00+00:00</updated><id>https://azure.github.io/AppService/2021/11/01/how-to-setup-continuous-deployment-using-acr-tasks-with-windows-containers</id><content type="html" xml:base="https://azure.github.io/AppService/2021/11/01/how-to-setup-continuous-deployment-using-acr-tasks-with-windows-containers.html">&lt;p&gt;ACR Tasks are a set of Azure CLI command features in Azure Container Registry that can help you automate container image builds.  This can be integrated as part of your continuous deployment work flow to quickly update your container images.  It will automate the process of building and pushing your images to your Azure Container Registry based on a set of triggers.&lt;/p&gt;
+
+&lt;p&gt;The following tutorial walks you through setting up an ACR Task with a Windows container app in a GitHub repository that will automate a build to your App Service upon code commit. Prerequisites include having your code available in a &lt;a href=&quot;https://docs.github.com/en/get-started/quickstart/create-a-repo&quot;&gt;GitHub repository&lt;/a&gt;, an &lt;a href=&quot;https://docs.microsoft.com/en-us/azure/container-registry/container-registry-get-started-portal&quot;&gt;Azure Container Registry&lt;/a&gt; and a &lt;a href=&quot;https://docs.microsoft.com/en-us/azure/app-service/quickstart-custom-container?tabs=dotnet&amp;amp;pivots=container-windows#create-a-windows-container-app&quot;&gt;Windows container&lt;/a&gt; App Service provisioned.&lt;/p&gt;
+
+&lt;h2 id=&quot;create-a-github-access-token&quot;&gt;Create a GitHub Access Token&lt;/h2&gt;
+
+&lt;p&gt;In order for you to create the task you will need to include a GitHub Personal Access Token (PAT) from the repository your code lives in. This PAT acts as authentication to access your repository.&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;In the upper-right corner of your repository, click your profile photo, and click &lt;strong&gt;Settings&lt;/strong&gt;.&lt;/li&gt;
+  &lt;li&gt;On the left-hand side menu, find and click on &lt;strong&gt;Developer Settings&lt;/strong&gt;.&lt;/li&gt;
+  &lt;li&gt;On the following page, click on &lt;strong&gt;Personal access tokens&lt;/strong&gt;.&lt;/li&gt;
+  &lt;li&gt;Then click &lt;strong&gt;Generate new token&lt;/strong&gt; on the upper-right hand side of the page.&lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;To generate a new token you will first need to fill out the required form.&lt;/p&gt;
+
+    &lt;p&gt;Fill in the following:&lt;/p&gt;
+
+    &lt;ul&gt;
+      &lt;li&gt;Note: name your token&lt;/li&gt;
+      &lt;li&gt;Expiration: 90 days&lt;/li&gt;
+      &lt;li&gt;Scope: repo&lt;/li&gt;
+    &lt;/ul&gt;
+
+    &lt;p&gt;&lt;img src=&quot;/AppService/media/2021/11/acr_1.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Then, you can scroll to the bottom of the page and click &lt;strong&gt;Generate token&lt;/strong&gt;.&lt;/li&gt;
+  &lt;li&gt;Copy your token on the next page and put it somewhere safe. You will not be shown this token again and we’ll need to use it when we create the task in a later step&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;For more information on creating a Personal Access Token, see this &lt;a href=&quot;https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token#creating-a-token&quot;&gt;GitHub doc&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2 id=&quot;enable-admin-user-in-azure-container-registry&quot;&gt;Enable Admin User in Azure Container Registry&lt;/h2&gt;
+
+&lt;p&gt;Before we create our task, we need to enable Admin user in your Container Registry. Enabling this will allow resource access when we add the webhook in a later step.&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;Go to your Container Registry resource&lt;/li&gt;
+  &lt;li&gt;Go to &lt;strong&gt;Access Keys&lt;/strong&gt; under Settings&lt;/li&gt;
+  &lt;li&gt;Go to &lt;strong&gt;Admin user&lt;/strong&gt; and click on the toggle to enable Admin user&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;&lt;img src=&quot;/AppService/media/2021/11/acr_2.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;build-and-deploy-with-acr-build&quot;&gt;Build and Deploy with ACR build&lt;/h2&gt;
+
+&lt;p&gt;Now that we have our container registry and GitHub repo setup, we can run the &lt;em&gt;acr build&lt;/em&gt; command. This will require the use of the Azure CLI. Make sure you are on the latest version of az cli before starting.&lt;/p&gt;
+
+&lt;p&gt;The ACR Task uses both &lt;em&gt;docker build&lt;/em&gt; and &lt;em&gt;docker push&lt;/em&gt; to build your images. Using this command you will create your image name and tag, which will build from your GitHub repo Dockerfile, then push it to your container registry.&lt;/p&gt;
+
+&lt;p&gt;To run the command you will need the following:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;Azure Container Registry Name&lt;/li&gt;
+  &lt;li&gt;GitHub repository URL&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;Open Command Prompt or Azure Cloud Shell and enter the command below. Keep in mind, this is where you will define your image name and tag.&lt;/p&gt;
+
+    &lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;az acr build &lt;span class=&quot;nt&quot;&gt;-r&lt;/span&gt; myacrregistry https://github.com/myusername/pdfsample.git &lt;span class=&quot;nt&quot;&gt;-f&lt;/span&gt; PDFSample/Dockerfile &lt;span class=&quot;nt&quot;&gt;--platform&lt;/span&gt; windows &lt;span class=&quot;nt&quot;&gt;--image&lt;/span&gt; mypdfsample:latest
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Once the command is finished running you’ll notice a set of dependencies are found in the output. This includes your image and runtime information. You can now visit your container registry resource to verify that your repository has been pushed to ACR.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/AppService/media/2021/11/acr_3.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;create-the-acr-task&quot;&gt;Create the ACR Task&lt;/h2&gt;
+
+&lt;p&gt;Next, we will create our Task.  This task will setup an automated trigger on code commit which will run a docker build and push the container to your registry.&lt;/p&gt;
+
+&lt;p&gt;To run the command you will need the following:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;Azure Container Registry Name&lt;/li&gt;
+  &lt;li&gt;GitHub repository URL&lt;/li&gt;
+  &lt;li&gt;GitHub Personal Access Token&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;In your Command Prompt or Azure Cloud Shell enter the command below. Keep in mind, this is where you will define the name of your task.&lt;/p&gt;
+
+    &lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;az acr task create &lt;span class=&quot;nt&quot;&gt;--registry&lt;/span&gt; myacrtaskregistry &lt;span class=&quot;nt&quot;&gt;--name&lt;/span&gt; taskmypdfsample &lt;span class=&quot;nt&quot;&gt;--image&lt;/span&gt; mypdfsample:latest &lt;span class=&quot;nt&quot;&gt;--context&lt;/span&gt; 
+https://github.com/myusername/pdfsample.git
+&lt;span class=&quot;nt&quot;&gt;--file&lt;/span&gt; PDFSample/Dockerfile &lt;span class=&quot;nt&quot;&gt;--git-access-token&lt;/span&gt; &amp;lt;access-token&amp;gt; &lt;span class=&quot;nt&quot;&gt;--platform&lt;/span&gt; windows
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Once you create the task you’ll notice the json output has information about which triggers are enabled. By default, the base image trigger and the commit triggers are enabled.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/AppService/media/2021/11/acr_4.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;At this point you can verify that your task will run. We can run a manual test trigger by using the following command:&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;az acr task run &lt;span class=&quot;nt&quot;&gt;--registry&lt;/span&gt; myacrtaskregistry &lt;span class=&quot;nt&quot;&gt;--name&lt;/span&gt; taskmypdfsample
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;This will run a manual test to trigger your build. Since our task is configured to trigger on code commit by default, you can also test triggering the task by committing code to your GitHub repository.&lt;/p&gt;
+
+&lt;p&gt;To verify that your tasks have run successfully use the below command&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;az acr task list-runs &lt;span class=&quot;nt&quot;&gt;--registry&lt;/span&gt; acrtaskreg2 &lt;span class=&quot;nt&quot;&gt;--output&lt;/span&gt; table
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;In this table you can verify the source of the Trigger, Platform, and Duration of the task.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/AppService/media/2021/11/acr_4.1.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Now that we know our task is working, we can setup continuous deployment in our next step.&lt;/p&gt;
+
+&lt;h2 id=&quot;enable-continuoud-deployment-in-your-web-app&quot;&gt;Enable Continuoud deployment in your Web App&lt;/h2&gt;
+
+&lt;p&gt;At this point if you haven’t already created your Web App, you can do that now with the container you pushed previously to ACR as your image source. Once your Web App is created or if you are working with an existing Web App, you can go through the following steps to setup continuous deployment between your container registry and web app.&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Go to your resource and click &lt;strong&gt;Deployment Center&lt;/strong&gt; under Deployment&lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;In the Settings tab, go to &lt;strong&gt;Continuous deployment&lt;/strong&gt; and click &lt;strong&gt;On&lt;/strong&gt;&lt;/p&gt;
+
+    &lt;p&gt;&lt;img src=&quot;/AppService/media/2021/11/acr_5.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Click &lt;strong&gt;Save&lt;/strong&gt; at the top of the screen&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Once it’s saved, a webhook will be added to your container registry resource. You can verify that it’s enabled by going to &lt;strong&gt;Webhooks&lt;/strong&gt; under &lt;strong&gt;Services&lt;/strong&gt; in your container registry resource.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/AppService/media/2021/11/acr_5.1.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Now that your webhook is enabled, you can create a code commit to your repository which will trigger your task and run the webhook. Once the task has finished running you can click on the webhook name to view the latest push.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/AppService/media/2021/11/acr_5.2.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Since your webhook is scoped to your image, it will recognize changes made to the repository with the same tag. If you use a different tag than the one that is scoped, it will not recognize the change.&lt;/p&gt;
+
+&lt;p&gt;Another way to verify that your webhook has worked is to view your container logs in the Deployment Center. Go to the &lt;strong&gt;Deployment Center&lt;/strong&gt; and view the &lt;strong&gt;Logs&lt;/strong&gt; tab. Here you will see that it has downloaded a newer image and is creating the container.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/AppService/media/2021/11/acr_6.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Once the newer image is downloaded and the container has started, you can browse to your application and view the code changes that you’ve committed from GitHub.  You have now setup continuous deployment via ACR Task that triggers a build and updates your container image on code commit.  Your scoped webhook to your specific image and tag will then continually update the image in App Service when a new image is recognized.&lt;/p&gt;
+
+&lt;h3 id=&quot;resources&quot;&gt;Resources&lt;/h3&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;&lt;a href=&quot;https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token#creating-a-token&quot;&gt;Creating GitHub Personal Access Token&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://docs.microsoft.com/en-us/cli/azure/acr?view=azure-cli-latest#az_acr_build&quot;&gt;Azure Container Registry CLI Reference Docs&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://docs.microsoft.com/en-us/azure/container-registry/container-registry-tutorial-quick-task&quot;&gt;Quick container image build&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://docs.github.com/en/get-started/quickstart/create-a-repo&quot;&gt;Create Azure Container Registry&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://docs.microsoft.com/en-us/azure/app-service/quickstart-custom-container?tabs=dotnet&amp;amp;pivots=container-windows#create-a-windows-container-app&quot;&gt;Create Windows container Web App&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://docs.github.com/en/get-started/quickstart/create-a-repo&quot;&gt;Create GitHub Repository&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;</content><author><name>Azure App Service</name></author><category term="windows containers" /><category term="docker" /><summary type="html">ACR Tasks are a set of Azure CLI command features in Azure Container Registry that can help you automate container image builds. This can be integrated as part of your continuous deployment work flow to quickly update your container images. It will automate the process of building and pushing your images to your Azure Container Registry based on a set of triggers.</summary></entry><entry><title type="html">Introduction to Azure Resource Graph for App Service</title><link href="https://azure.github.io/AppService/2021/10/29/Intro-to-Azure-Resource-Graph-for-App-Service.html" rel="alternate" type="text/html" title="Introduction to Azure Resource Graph for App Service" /><published>2021-10-29T00:00:00+00:00</published><updated>2021-10-29T00:00:00+00:00</updated><id>https://azure.github.io/AppService/2021/10/29/Intro-to-Azure-Resource-Graph-for-App-Service</id><content type="html" xml:base="https://azure.github.io/AppService/2021/10/29/Intro-to-Azure-Resource-Graph-for-App-Service.html">&lt;p&gt;&lt;a href=&quot;https://docs.microsoft.com/azure/governance/resource-graph/overview&quot;&gt;Azure Resource Graph (ARG)&lt;/a&gt; is an Azure service that gives you the ability to query and explore your Azure resources across a given set of subscriptions so that you can effectively govern your environments, especially if you manage multiple large scale environments. Azure Resource Graph powers Azure portal’s search bar, the new browse ‘All resources’ experience, and Azure Policy’s &lt;a href=&quot;https://docs.microsoft.com/azure/governance/policy/how-to/determine-non-compliance#change-history&quot;&gt;Change history&lt;/a&gt; visual diff.&lt;/p&gt;
+
+&lt;p&gt;With Azure Resource Graph, you can:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Query resources with complex filtering, grouping, and sorting by resource properties&lt;/li&gt;
+  &lt;li&gt;Iteratively explore resources based on governance requirements&lt;/li&gt;
+  &lt;li&gt;Assess the impact of applying policies in a vast cloud environment&lt;/li&gt;
+  &lt;li&gt;Detail &lt;a href=&quot;https://docs.microsoft.com/azure/governance/policy/how-to/determine-non-compliance#change-history&quot;&gt;changes made to resource properties&lt;/a&gt; (preview)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;For more details on how to use Azure Resource Graph, see the &lt;a href=&quot;https://docs.microsoft.com/azure/governance/resource-graph/&quot;&gt;documentation&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2 id=&quot;benefits-of-azure-resource-graph&quot;&gt;Benefits of Azure Resource Graph&lt;/h2&gt;
+
+&lt;p&gt;Prior to Azure Resource Graph, you had access to services like &lt;a href=&quot;https://docs.microsoft.com/azure/azure-resource-manager/management/overview&quot;&gt;Azure Resource Manager (ARM)&lt;/a&gt; to query your resources. Resource Manager only supports queries over basic resource fields and provides the ability for calling individual resource providers for detailed properties one resource at a time. With Azure Resource Graph, you can access these properties the resource providers return without needing to make individual calls to each resource provider. This increases investigation efficiency and simplifies escalation paths for monitoring, incident response, and investigation teams.&lt;/p&gt;
+
+&lt;h2 id=&quot;azure-resource-graph-and-app-service&quot;&gt;Azure Resource Graph and App Service&lt;/h2&gt;
+
+&lt;h3 id=&quot;limitations&quot;&gt;Limitations&lt;/h3&gt;
+
+&lt;p&gt;As of publishing this post, the following &lt;code class=&quot;highlighter-rouge&quot;&gt;Microsoft.web&lt;/code&gt; resource types are supported by Azure Resource Graph:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;microsoft.web/apimanagementaccounts&lt;/li&gt;
+  &lt;li&gt;microsoft.web/apimanagementaccounts/apis&lt;/li&gt;
+  &lt;li&gt;microsoft.web/certificates&lt;/li&gt;
+  &lt;li&gt;Microsoft.Web/connectionGateways (On-premises Data Gateways)&lt;/li&gt;
+  &lt;li&gt;Microsoft.Web/connections (API Connections)&lt;/li&gt;
+  &lt;li&gt;Microsoft.Web/customApis (Logic Apps Custom Connector)&lt;/li&gt;
+  &lt;li&gt;Microsoft.Web/HostingEnvironments (App Service Environments)&lt;/li&gt;
+  &lt;li&gt;Microsoft.Web/KubeEnvironments (App Service Kubernetes Environments)&lt;/li&gt;
+  &lt;li&gt;Microsoft.Web/serverFarms (App Service plans)&lt;/li&gt;
+  &lt;li&gt;Microsoft.Web/sites (App Services)&lt;/li&gt;
+  &lt;li&gt;microsoft.web/sites/premieraddons&lt;/li&gt;
+  &lt;li&gt;Microsoft.Web/sites/slots (App Service (Slots))&lt;/li&gt;
+  &lt;li&gt;Microsoft.Web/StaticSites (Static Web Apps)&lt;/li&gt;
+  &lt;li&gt;Microsoft.Web/WorkerApps (Container Apps)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;For a full list of supported resource types, review the &lt;a href=&quot;https://docs.microsoft.com/azure/governance/resource-graph/reference/supported-tables-resources&quot;&gt;table and resource type reference&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Azure Resource Graph is currently receiving notifications for all resources tracked by ARM. If a resource or resource property changes outside of ARM (i.e. for resources not tracked by ARM), the team is currently working on onboarding these resources to enable users to have access to them using ARG. This is an ongoing process the ARG team is working through. Refer to the &lt;a href=&quot;https://docs.microsoft.com/azure/governance/resource-graph/reference/supported-tables-resources&quot;&gt;table and resource type reference&lt;/a&gt; for updates as additional resources gain support.&lt;/p&gt;
+
+&lt;h3 id=&quot;querying-resources&quot;&gt;Querying resources&lt;/h3&gt;
+
+&lt;p&gt;There are a number of &lt;a href=&quot;https://docs.microsoft.com/azure/governance/resource-graph/first-query-portal&quot;&gt;quickstarts&lt;/a&gt; provided by the ARG team to help you get started with running queries. The Portal is a good place to start as it gives you a GUI based experience and formatted results that link to the queried resources for easy navigation. The query structure is based on &lt;a href=&quot;https://docs.microsoft.com/azure/data-explorer/kusto/query/index&quot;&gt;Kusto Query Language (KQL)&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;To get you started with ARG for App Service, below are basic queries to give you an idea of what you can query as well as what these queries can be used for.&lt;/p&gt;
+
+&lt;p&gt;To see all sites across all subscriptions and resources groups:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-kusto&quot;&gt;resources
+| where type == &quot;microsoft.web/sites&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Below is a sample of the output. If you have more sites in your account, they will all be listed.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/AppService/media/2021/10/basicquery.png&quot; alt=&quot;basic query&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;You can select “See details” at the end of the row to view additional information about your resources.&lt;/p&gt;
+
+&lt;p&gt;You can query on any of the available fields for the specific resource. For example, if you want to see all your sites that are located in Central US:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-kusto&quot;&gt;resources
+| where type == &quot;microsoft.web/sites&quot;
+| where location == &quot;centralus&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Or if you want to see all of your running sites, you can drill into the “properties” object:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-kusto&quot;&gt;resources
+| where type == &quot;microsoft.web/sites&quot;
+| where properties.state == &quot;Running&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Many of the fields, specifically in the “properties” object, at this time will be showing as “null.” For example, if you are looking for details about the “siteConfig” object, the resource provider does not expose them at this time. This is due to these properties not being tracked by ARM and not being onboarded to ARG yet. Review the &lt;a href=&quot;#limitations&quot;&gt;limitations&lt;/a&gt; to understand what properties are currently available.&lt;/p&gt;
+
+&lt;p&gt;Additionally, you can use ARG to do analytics and create &lt;a href=&quot;https://docs.microsoft.com/azure/governance/resource-graph/first-query-portal#pin-the-query-visualization-to-a-dashboard&quot;&gt;dashboards&lt;/a&gt; to monitor your resources.&lt;/p&gt;
+
+&lt;p&gt;To get a sites count by region:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-kusto&quot;&gt;resources
+| where type == &quot;microsoft.web/sites&quot;
+| summarize count() by location
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And to create a visual, you can select “Charts” under the query box and choose from the given visualization options. Below is a map of the distribution of sites in a demo account.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/AppService/media/2021/10/regionquery.png&quot; alt=&quot;region query&quot; /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;change-detection-preview&quot;&gt;Change detection (preview)&lt;/h3&gt;
+
+&lt;p&gt;Change detection is now in public preview for all resources that support &lt;a href=&quot;https://docs.microsoft.com/azure/azure-resource-manager/templates/deployment-complete-mode-deletion&quot;&gt;complete mode deletion&lt;/a&gt;. For App Service, as of writing this article, the relevant resources that are supported include &lt;code class=&quot;highlighter-rouge&quot;&gt;Microsoft.web/sites&lt;/code&gt;, &lt;code class=&quot;highlighter-rouge&quot;&gt;Microsoft.web/sites/slots&lt;/code&gt;, &lt;code class=&quot;highlighter-rouge&quot;&gt;Microsoft.Web/serverFarms&lt;/code&gt; as well as a couple additional resources that can be found &lt;a href=&quot;https://docs.microsoft.com/azure/azure-resource-manager/templates/deployment-complete-mode-deletion#microsoftweb&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;With change detection, the last 14 days of change history (properties that are added, removed, or altered) for the supported resources are available and can be accessed from the &lt;a href=&quot;https://docs.microsoft.com/azure/governance/resource-graph/how-to/get-resource-changes&quot;&gt;APIs directly&lt;/a&gt; or from the Portal which provides a &lt;em&gt;visual diff&lt;/em&gt; for each change. Change history can assist in determining causes of non-compliance and help you determine when a change was made and by who so further investigation can be conducted.&lt;/p&gt;
+
+&lt;p&gt;For example, if you want to see when an app setting was modified, head over to the “Activity log” for your App Service and filter to your resource. Select the relevant “Operation name” and then “Change detection (preview)” in the flyout on the right. Double clicking into the operation in the list will take you to a visual diff so you can see exactly what changed in the json config of the resource.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/AppService/media/2021/10/changeappsetting.png&quot; alt=&quot;app setting change&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Or if you want to see when someone modifies access restrictions for an app, you can see all changes to your firewall rules:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/AppService/media/2021/10/securitychange.png&quot; alt=&quot;security change&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Change detection should enable you to view changes for any field in the json config of the supported resources as long as the field does not have a “null” value. A value of “null” indicates the resource provider is either not exposing this information at this time, or the field does not apply for your resource.&lt;/p&gt;
+
+&lt;h2 id=&quot;wrapping-up&quot;&gt;Wrapping up&lt;/h2&gt;
+
+&lt;p&gt;The Azure Resource Graph team is continuously adding additional support for App Service to give users access to more information about their resources. Make sure to continuously check the &lt;a href=&quot;https://docs.microsoft.com/azure/governance/resource-graph/reference/supported-tables-resources&quot;&gt;table and resource type reference&lt;/a&gt; for updates as additional resource types get supported.&lt;/p&gt;</content><author><name>Azure App Service</name></author><summary type="html">Azure Resource Graph (ARG) is an Azure service that gives you the ability to query and explore your Azure resources across a given set of subscriptions so that you can effectively govern your environments, especially if you manage multiple large scale environments. Azure Resource Graph powers Azure portal’s search bar, the new browse ‘All resources’ experience, and Azure Policy’s Change history visual diff.</summary></entry><entry><title type="html">How to Create a Web App with a Hybrid Connection</title><link href="https://azure.github.io/AppService/2021/10/15/How-to-create-a-web-app-with-a-hybrid-connection.html" rel="alternate" type="text/html" title="How to Create a Web App with a Hybrid Connection" /><published>2021-10-15T00:00:00+00:00</published><updated>2021-10-15T00:00:00+00:00</updated><id>https://azure.github.io/AppService/2021/10/15/How-to-create-a-web-app-with-a-hybrid-connection</id><content type="html" xml:base="https://azure.github.io/AppService/2021/10/15/How-to-create-a-web-app-with-a-hybrid-connection.html">&lt;p&gt;&lt;a href=&quot;https://docs.microsoft.com/azure/app-service/app-service-hybrid-connections&quot;&gt;Hybrid Connections&lt;/a&gt; is a feature in App Service that provides access from your app to a TCP endpoint allowing your app to access application resources in any network that can make outbound calls to Azure over port 443. For those that want their apps in App Service to securely access other resources (typically outside of Azure - within Azure you would use &lt;a href=&quot;https://docs.microsoft.com/azure/private-link/private-endpoint-overview&quot;&gt;Private Endpoints&lt;/a&gt; for example) but don’t want to set up an &lt;a href=&quot;https://docs.microsoft.com/azure/expressroute/&quot;&gt;Azure ExpressRoute&lt;/a&gt; or connection via the public internet, Hybrid Connections can be an efficient and simple solution.&lt;/p&gt;
+
+&lt;p&gt;If you have decided to go down the route of using an App Service Hybrid Connection to connect your web app in App Service to a resource in another network, this tutorial will walk you through setting up the connection and demonstrate how you would connect to a database on your local machine. If you are unfamiliar with Hybrid Connections, take a look at the documentation for &lt;a href=&quot;https://docs.microsoft.com/azure/service-bus-relay/relay-hybrid-connections-protocol/&quot;&gt;Azure Relay Hybrid Connections&lt;/a&gt; and &lt;a href=&quot;https://docs.microsoft.com/azure/app-service/app-service-hybrid-connections&quot;&gt;App Service Hybrid Connections&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2 id=&quot;prerequisites&quot;&gt;Prerequisites&lt;/h2&gt;
+
+&lt;p&gt;If you don’t have an &lt;a href=&quot;https://docs.microsoft.com/azure/guides/developer/azure-developer-guide#understanding-accounts-subscriptions-and-billing&quot;&gt;Azure subscription&lt;/a&gt;, create a &lt;a href=&quot;https://azure.microsoft.com/free/?ref=microsoft.com&amp;amp;utm_source=microsoft.com&amp;amp;utm_medium=docs&amp;amp;utm_campaign=visualstudio&quot;&gt;free account&lt;/a&gt; before you begin.&lt;/p&gt;
+
+&lt;p&gt;For this tutorial, a &lt;a href=&quot;https://github.com/achowba/node-mysql-crud-app&quot;&gt;Node.js app&lt;/a&gt; with a MySQL database will be used. It is important to review the How-To guides specifically for &lt;a href=&quot;https://docs.microsoft.com/en-us/azure/app-service/configure-language-nodejs?pivots=platform-windows&quot;&gt;configuring an app&lt;/a&gt; on the &lt;a href=&quot;https://docs.microsoft.com/en-us/azure/app-service/&quot;&gt;App Service Docs&lt;/a&gt; site to ensure you are configuring your app appropriately based on your app’s runtime. For more information on how to build apps with a database, see the &lt;a href=&quot;https://docs.microsoft.com/azure/app-service/tutorial-nodejs-mongodb-app?pivots=platform-windows&quot;&gt;tutorials&lt;/a&gt; posted on the App Service Docs site. The Node.js and MySQL app used for this tutorial was created by Atauba Prince. Check out his &lt;a href=&quot;https://dev.to/achowba/build-a-simple-app-using-node-js-and-mysql-19me&quot;&gt;post&lt;/a&gt; to learn more about how it works and how to build it from scratch.&lt;/p&gt;
+
+&lt;h2 id=&quot;prepare-local-mysql&quot;&gt;Prepare local MySQL&lt;/h2&gt;
+
+&lt;p&gt;In this step, you create a database in your local MySQL server. If you don’t have a local MySQL server, &lt;a href=&quot;https://dev.mysql.com/doc/refman/5.7/en/installing.html&quot;&gt;install and start MySQL&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;For this tutorial on Hybrid Connections, you will be connecting to your database as root. This is only being done for simplicity due to this being a Hybrid Connections focused tutorial. Connecting as root is not best practice and it’s recommended to use fine grained access control and to follow &lt;a href=&quot;https://docs.microsoft.com/azure/app-service/security-recommendations&quot;&gt;security best practices&lt;/a&gt; when accessing resources.&lt;/p&gt;
+
+&lt;h3 id=&quot;connect-to-local-mysql-server&quot;&gt;Connect to local MySQL server&lt;/h3&gt;
+
+&lt;p&gt;In a terminal window, connect to your local MySQL server.&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;mysql &lt;span class=&quot;nt&quot;&gt;-u&lt;/span&gt; root &lt;span class=&quot;nt&quot;&gt;-p&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;If you’re prompted for a password, enter the password for the &lt;code class=&quot;highlighter-rouge&quot;&gt;root&lt;/code&gt; account. If you don’t remember your root account password, see &lt;a href=&quot;https://dev.mysql.com/doc/refman/5.7/en/resetting-permissions.html&quot;&gt;MySQL: How to Reset the Root Password&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;If your command runs successfully, then your MySQL server is running. If not, make sure that your local MySQL server is started by following the &lt;a href=&quot;https://dev.mysql.com/doc/refman/5.7/en/postinstallation.html&quot;&gt;MySQL post-installation steps&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h3 id=&quot;create-a-database-locally&quot;&gt;Create a database locally&lt;/h3&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;At the &lt;code class=&quot;highlighter-rouge&quot;&gt;mysql&lt;/code&gt; prompt, create a database.&lt;/p&gt;
+
+    &lt;div class=&quot;language-sql highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; &lt;span class=&quot;k&quot;&gt;CREATE&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;DATABASE&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;socka&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+ &lt;span class=&quot;k&quot;&gt;CREATE&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;TABLE&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;IF&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NOT&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;EXISTS&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;`players`&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+     &lt;span class=&quot;nv&quot;&gt;`id`&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;int&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NOT&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NULL&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;AUTO_INCREMENT&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+     &lt;span class=&quot;nv&quot;&gt;`first_name`&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;varchar&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;255&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NOT&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NULL&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+     &lt;span class=&quot;nv&quot;&gt;`last_name`&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;varchar&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;255&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NOT&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NULL&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+     &lt;span class=&quot;nv&quot;&gt;`position`&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;varchar&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;255&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NOT&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NULL&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+     &lt;span class=&quot;nv&quot;&gt;`number`&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;int&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;11&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NOT&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NULL&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+     &lt;span class=&quot;nv&quot;&gt;`image`&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;varchar&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;255&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NOT&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NULL&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+     &lt;span class=&quot;nv&quot;&gt;`user_name`&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;varchar&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;20&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NOT&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;NULL&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+     &lt;span class=&quot;k&quot;&gt;PRIMARY&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;KEY&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;`id`&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+ &lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ENGINE&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;InnoDB&lt;/span&gt;  &lt;span class=&quot;k&quot;&gt;DEFAULT&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;CHARSET&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;latin1&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;AUTO_INCREMENT&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Exit your server connection by typing &lt;code class=&quot;highlighter-rouge&quot;&gt;quit&lt;/code&gt;.&lt;/p&gt;
+
+    &lt;div class=&quot;language-sql highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; &lt;span class=&quot;n&quot;&gt;quit&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;At this point, your database is fully configured and you can move on to configuring the app.&lt;/p&gt;
+
+&lt;h2 id=&quot;create-a-nodejs-app-locally&quot;&gt;Create a Node.js app locally&lt;/h2&gt;
+
+&lt;p&gt;In this step, you will create a local Node.js app to connect to your database to ensure the app and database function as intended. It is good practice to ensure your app functions locally prior to deploying to App Service.&lt;/p&gt;
+
+&lt;h3 id=&quot;clone-the-sample&quot;&gt;Clone the sample&lt;/h3&gt;
+
+&lt;p&gt;In a terminal window, &lt;code class=&quot;highlighter-rouge&quot;&gt;cd&lt;/code&gt; to a working directory.&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;Clone the sample repository and change to the repository root.&lt;/p&gt;
+
+    &lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; git clone https://github.com/achowba/node-mysql-crud-app
+ &lt;span class=&quot;nb&quot;&gt;cd &lt;/span&gt;node-mysql-crud-app
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Install the required packages.&lt;/p&gt;
+
+    &lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; npm &lt;span class=&quot;nb&quot;&gt;install&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&quot;configure-mysql-connection&quot;&gt;Configure MySQL connection&lt;/h3&gt;
+
+&lt;p&gt;In the repository root, open up the &lt;em&gt;app.js&lt;/em&gt; file. If you are following along with the tutorial, you should not need to change anything. If you created a user to access your database, you will need to update the &lt;em&gt;mysql.createConnection&lt;/em&gt; function with the appropriate parameters.&lt;/p&gt;
+
+&lt;h3 id=&quot;run-the-application&quot;&gt;Run the application&lt;/h3&gt;
+
+&lt;p&gt;Ensure that your MySQL server is up and running and go ahead and start the application.&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;node app.js
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Check your terminal to ensure your code has no errors, then head over to your browser and open http://localhost:2000. Feel free to play around with the app by adding, editing, and deleting players. All updates that you make will be stored in the local database. Later on, when you create the app in App Service, since you will be connecting to this same database, you will see the same values.&lt;/p&gt;
+
+&lt;h2 id=&quot;configure-the-app-for-app-service&quot;&gt;Configure the app for App Service&lt;/h2&gt;
+
+&lt;p&gt;Depending on the runtime of your app, you may need to make minor changes to ensure your App will run on App Service. For Node.js applications, review &lt;a href=&quot;https://docs.microsoft.com/azure/app-service/configure-language-nodejs?pivots=platform-windows&quot;&gt;this guidance&lt;/a&gt;. For this tutorial, you will be modifying the database connection parameters to use app settings rather than hard-coded values. This is more secure and allows you to make updates without having to modify the source code and then wait for the app to re-build and re-deploy.&lt;/p&gt;
+
+&lt;p&gt;Go back to the &lt;em&gt;app.js&lt;/em&gt; file and find the &lt;em&gt;mysql.createConnection&lt;/em&gt; function. Replace the values for the parameters with environment variables. The function should look like the below. The names for the values of the settings are arbitrary, but note what they are as you will need them a little later on.&lt;/p&gt;
+
+&lt;div class=&quot;language-javascript highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kd&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;db&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;mysql&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;createConnection&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;({&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;host&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;process&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;env&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;DB_HOST&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;user&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;process&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;env&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;DB_USER&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;password&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;process&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;env&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;DB_PASSWORD&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;database&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;process&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;env&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;DB_NAME&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;port&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;process&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;env&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;DB_PORT&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;deploy-app-to-azure&quot;&gt;Deploy app to Azure&lt;/h2&gt;
+
+&lt;h3 id=&quot;create-a-web-app&quot;&gt;Create a web app&lt;/h3&gt;
+
+&lt;p&gt;At this point, you are ready to deploy the app to App Service. Ensure you are in the root directory of your app and deploy your code using the &lt;code class=&quot;highlighter-rouge&quot;&gt;az webapp up&lt;/code&gt; command. Pick a unique name for your app. You will be prompted if the name you choose is already in use. Note the addition of the &lt;code class=&quot;highlighter-rouge&quot;&gt;os-type&lt;/code&gt; parameter. This is included here to create the app on App Service on Windows. If you want to create it on Linux, be aware that you need to modify the &lt;code class=&quot;highlighter-rouge&quot;&gt;host&lt;/code&gt; parameter in your connection string to something other than “localhost” (i.e. if using Linux, don’t use “localhost” and instead use a different host or try your machine name). On Linux, “localhost” is an entity in the hosts file of basically any Linux entity which means it never actually resolves the hybrid connection as it would on Windows.&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;az webapp up &lt;span class=&quot;nt&quot;&gt;--sku&lt;/span&gt; B1 &lt;span class=&quot;nt&quot;&gt;--name&lt;/span&gt; &amp;lt;app-name&amp;gt; &lt;span class=&quot;nt&quot;&gt;--os-type&lt;/span&gt; Windows
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;The command may take a few minutes to complete. When finished, navigate to your App Service in the &lt;a href=&quot;https://portal.azure.com&quot;&gt;Azure portal&lt;/a&gt;. At this point, you will have an App Service with deployed code, however your app will not function until you connect the database.&lt;/p&gt;
+
+&lt;h3 id=&quot;configure-database-settings&quot;&gt;Configure database settings&lt;/h3&gt;
+
+&lt;p&gt;In App Service, you set environment variables as app settings by using the &lt;a href=&quot;https://docs.microsoft.com/cli/azure/webapp/config/appsettings#az_webapp_config_appsettings_set&quot;&gt;az webapp config appsettings set&lt;/a&gt; command (you can also do this directly in the portal).&lt;/p&gt;
+
+&lt;p&gt;Execute the following command. Note the values for the app settings are what were previously used in the &lt;em&gt;mysql.createConnection&lt;/em&gt; function. If you had different values, be sure to substitute them accordingly. Also be sure to fill in the placeholders for app name and resource group. These values can be found by navigating to your app in the portal or by executing the &lt;code class=&quot;highlighter-rouge&quot;&gt;az webapp show&lt;/code&gt; command.&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;az webapp config appsettings &lt;span class=&quot;nb&quot;&gt;set&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;--name&lt;/span&gt; &amp;lt;app-name&amp;gt; &lt;span class=&quot;nt&quot;&gt;--resource-group&lt;/span&gt; &amp;lt;resource-group&amp;gt; &lt;span class=&quot;nt&quot;&gt;--settings&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;DB_HOST&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;localhost&quot;&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;DB_DATABASE&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;socka&quot;&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;DB_USERNAME&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;root&quot;&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;DB_PASSWORD&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&quot;&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;DB_PORT&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;3306&quot;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;create-hybrid-connection&quot;&gt;Create Hybrid Connection&lt;/h3&gt;
+
+&lt;p&gt;The final step is to create the Hybrid Connection from your App Service to your local database. Be sure to review the &lt;a href=&quot;https://docs.microsoft.com/azure/app-service/app-service-hybrid-connections#things-you-cannot-do-with-hybrid-connections&quot;&gt;system requirements&lt;/a&gt; for the Hybrid Connection Manager to ensure your scenario is eligible for this feature.&lt;/p&gt;
+
+&lt;p&gt;To create a Hybrid Connection, go to the &lt;a href=&quot;https://portal.azure.com&quot;&gt;Azure portal&lt;/a&gt; and select your app. Select &lt;strong&gt;Networking&lt;/strong&gt; from the left-hand side then &lt;strong&gt;Hybrid connections&lt;/strong&gt; under &lt;strong&gt;Outbound Traffic&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;p&gt;Towards the top of the screen, you should see a button to “Download connection manager.” Download and install the Hybrid Connection Manager (HCM) on your local machine. You will need that after configuring the connection in the portal.&lt;/p&gt;
+
+&lt;p&gt;To add a new Hybrid Connection, select &lt;strong&gt;[+] Add hybrid connection&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;p&gt;You’ll see a list of the Hybrid Connections that you already created if you have used Hybrid Connections before. To add one or more of them to your app, select the ones you want, and then select &lt;strong&gt;Add selected Hybrid Connection&lt;/strong&gt;. If you are new to Hybrid Connections, you will need to create a one that connects to the MySQL database on your local machine. To do this, select &lt;strong&gt;Create new hybrid connection&lt;/strong&gt; and input the required values. For this tutorial, the values are as follows:&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;Setting&lt;/th&gt;
+      &lt;th&gt;Value&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Hybrid connection Name&lt;/td&gt;
+      &lt;td&gt;(create a name)&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Endpoint Host&lt;/td&gt;
+      &lt;td&gt;localhost&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Endpoint Port&lt;/td&gt;
+      &lt;td&gt;3306&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Servicebus namespace&lt;/td&gt;
+      &lt;td&gt;&lt;em&gt;Create new&lt;/em&gt; (or use an existing one if you have one already)&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Location&lt;/td&gt;
+      &lt;td&gt;(pick a location close to you, I recommend using the same one as your resource group)&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Name&lt;/td&gt;
+      &lt;td&gt;(create a name)&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;Select &lt;strong&gt;Ok&lt;/strong&gt; and your Hybrid Connection will get created and you will get re-directed to the &lt;strong&gt;Hybrid connections&lt;/strong&gt; blade. You should see the Hybrid Connection you just created in the list with a status of “Not connected.”&lt;/p&gt;
+
+&lt;p&gt;The Hybrid Connections feature requires a relay agent in the network that hosts your Hybrid Connection endpoint. That relay agent is called the Hybrid Connection Manager (what you downloaded earlier). After installing the Hybrid Connection Manager, you can run HybridConnectionManagerUi.exe to use the UI for the tool. This file is in the Hybrid Connection Manager installation directory. In Windows 10, you can also just search for Hybrid Connection Manager UI in your search box.&lt;/p&gt;
+
+&lt;p&gt;To add one or more Hybrid Connections:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Select &lt;strong&gt;Add a new Hybrid Connection&lt;/strong&gt;.&lt;/li&gt;
+  &lt;li&gt;Sign in with your Azure account to get your Hybrid Connections available with your subscriptions. The Hybrid Connection Manager does not continue to use your Azure account beyond that.&lt;/li&gt;
+  &lt;li&gt;Choose a subscription.&lt;/li&gt;
+  &lt;li&gt;Select the Hybrid Connections that you want to relay.&lt;/li&gt;
+  &lt;li&gt;Select &lt;strong&gt;Save&lt;/strong&gt;.&lt;/li&gt;
+  &lt;li&gt;You can now see the Hybrid Connections you added. You can also select the configured Hybrid Connection to see details.&lt;/li&gt;
+  &lt;li&gt;Under &lt;strong&gt;Azure Status&lt;/strong&gt;, ensure that you are “Connected”. If you are not, open up Task Manager on your Windows machine, go to the “Services” tab, and find the &lt;em&gt;HybridConnectionManager&lt;/em&gt; service. Right click it and select &lt;strong&gt;Restart&lt;/strong&gt;. Head back over to the Hybrid Connection Manager and select &lt;strong&gt;Refresh&lt;/strong&gt; to update the Azure connection status. You should now see a “Connected” status. If not, have a look at the &lt;a href=&quot;https://docs.microsoft.com/en-us/azure/app-service/app-service-hybrid-connections#troubleshooting&quot;&gt;troubleshooting info&lt;/a&gt; for App Service Hybrid Connections.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&quot;browse-to-the-azure-app&quot;&gt;Browse to the Azure app&lt;/h3&gt;
+
+&lt;p&gt;Browse to &lt;code class=&quot;highlighter-rouge&quot;&gt;http://&amp;lt;app-name&amp;gt;.azurewebsites.net&lt;/code&gt; and see your app exactly how it was running locally, but this time with the app in Azure connected to your local database!&lt;/p&gt;
+
+&lt;h2 id=&quot;clean-up-resources&quot;&gt;Clean up resources&lt;/h2&gt;
+
+&lt;p&gt;In the preceding steps, you created Azure resources in a resource group. The resource group has a name like “appsvc_rg_Linux_CentralUS” depending on your location. If you keep the web app running, you will incur some ongoing costs (see &lt;a href=&quot;https://azure.microsoft.com/pricing/details/app-service/linux/&quot;&gt;App Service pricing&lt;/a&gt;).&lt;/p&gt;
+
+&lt;p&gt;If you don’t expect to need these resources in the future, delete the resource group by running the following command:&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;az group delete &lt;span class=&quot;nt&quot;&gt;--no-wait&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;</content><author><name>Azure App Service</name></author><category term="networking" /><summary type="html">Hybrid Connections is a feature in App Service that provides access from your app to a TCP endpoint allowing your app to access application resources in any network that can make outbound calls to Azure over port 443. For those that want their apps in App Service to securely access other resources (typically outside of Azure - within Azure you would use Private Endpoints for example) but don’t want to set up an Azure ExpressRoute or connection via the public internet, Hybrid Connections can be an efficient and simple solution.</summary></entry><entry><title type="html">Managing an App Service Domain</title><link href="https://azure.github.io/AppService/2021/09/22/2021-Managing-ASD.html" rel="alternate" type="text/html" title="Managing an App Service Domain" /><published>2021-09-22T00:00:00+00:00</published><updated>2021-09-22T00:00:00+00:00</updated><id>https://azure.github.io/AppService/2021/09/22/2021-Managing-ASD</id><content type="html" xml:base="https://azure.github.io/AppService/2021/09/22/2021-Managing-ASD.html">&lt;p&gt;App Service Domain is a domain resource on Azure which integrates with Azure DNS. This allows you to manage all your resources on Azure for when you need to get your web app up and running.&lt;/p&gt;
+
+&lt;h2 id=&quot;purchasing-an-app-service-domain&quot;&gt;Purchasing an App Service Domain&lt;/h2&gt;
+
+&lt;p&gt;Refer to the docs on &lt;a href=&quot;https://docs.microsoft.com/en-us/azure/app-service/manage-custom-dns-buy-domain#buy-an-app-service-domain&quot;&gt;how to purchase an App Service Domain&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2 id=&quot;managing-dns&quot;&gt;Managing DNS&lt;/h2&gt;
+
+&lt;p&gt;An Azure DNS resource also gets created with your App Service Domain by default. You can use your Azure DNS to manage the DNS of your domain.&lt;/p&gt;
+
+&lt;p&gt;You can look for the Azure DNS resource by either searching for the Azure DNS with the same domain name or go to it through your App Service Domain via “Manage DNS records”.&lt;/p&gt;
+
+&lt;h2 id=&quot;transfering-domain-out&quot;&gt;Transfering domain out&lt;/h2&gt;
+
+&lt;p&gt;Transfering of domain out of Azure (not a registrar) to another registrar is supported and you may currently do so via API and PowerShell. You will need to get an authorization code which you can take to the registrar of choice to proceed with transfering out of your domain.&lt;/p&gt;
+
+&lt;h3 id=&quot;exceptions-for-transfering-domain-out&quot;&gt;Exceptions for transfering domain out&lt;/h3&gt;
+
+&lt;p&gt;You won’t be able to transfer your domain within 60 days of these events:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;New domain registration&lt;/li&gt;
+  &lt;li&gt;Transfer between different registrars&lt;/li&gt;
+  &lt;li&gt;Change to registrant contact information&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&quot;special-case-for-uk-domains&quot;&gt;Special case for “.uk” domains&lt;/h3&gt;
+
+&lt;p&gt;For any “.uk” domains, you’ll need the new registrar’s IPS tag. Create a support case and provide us the IPS tag. We will assist with updating the IPS tag on your domain to your new registrar and then you can complete the transfer out process with your new registrar.&lt;/p&gt;
+
+&lt;h3 id=&quot;what-is-an-authorization-code&quot;&gt;What is an authorization code?&lt;/h3&gt;
+
+&lt;p&gt;The authorization code is a unique string of characters consisting of letters, numbers, and special characters (ie. ? ! ^) that is required to transfer a domain from one registrar to another.&lt;/p&gt;
+
+&lt;h3 id=&quot;getting-authorization-code-with-transfer-out-api&quot;&gt;Getting authorization code with transfer out API&lt;/h3&gt;
+
+&lt;p&gt;You can use the transfer out API:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;PUT https://management.azure.com/subscriptions/&amp;lt;SUBSCRIPTION-ID&amp;gt;/resourceGroups/&amp;lt;RESOURCE-GROUP-NAME&amp;gt;/providers/Microsoft.DomainRegistration/domains/&amp;lt;DOMAIN-NAME&amp;gt;/transferout?api-version=2021-02-01
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;You may be able to run this API on &lt;a href=&quot;https://resources.azure.com/raw/&quot;&gt;Azure Resource Explorer&lt;/a&gt;. Fill out the necessary information in between the “&amp;lt;” and “&amp;gt;” from the above, then paste the API call to you Azure Resource Explorer. Highlight the entire line from “PUT” until “api-version=2021-02-01” and hit Ctrl+S to run the command. You would expect similar results from the image below.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/AppService/media/2021/09/Azure-Resource-Explorer-Transfer-Out.png&quot; alt=&quot;Azure Resource Explorer Transfer Out&quot; class=&quot;align-center&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Refer to the “authCode” value without the double quotes (“). This will be the authorization code you will need to provide the new domain registrar to transfer your domain out.&lt;/p&gt;
+
+&lt;h3 id=&quot;getting-authorization-code-with-powershell&quot;&gt;Getting authorization code with Powershell&lt;/h3&gt;
+
+&lt;p&gt;There currently is no first class Powershell support for domain transfer out. However, you can use the following call below to get your authorization code:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-PS&quot;&gt;Invoke-AzRestMethod -Path &quot;/subscriptions/&amp;lt;SUBSCRIPTION-ID&amp;gt;/resourceGroups/&amp;lt;RESOURCE-GROUP-NAME&amp;gt;/providers/Microsoft.DomainRegistration/domains/&amp;lt;DOMAIN-NAME&amp;gt;/transferout?api-version=2021-02-01&quot; -Method PUT
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Refer to the “authCode” value without the double quotes (“). This will be the authorization code you will need to provide the new domain registrar to transfer your domain out.&lt;/p&gt;
+
+&lt;h4 id=&quot;using-cloudshell&quot;&gt;Using Cloudshell&lt;/h4&gt;
+&lt;p&gt;If you are having issues running the command in your local PowerShell, try using Cloud Shell on Azure Portal instead. You can access Cloud Shell on the top right navigation on Azure Portal. Once the Cloud Shell windows appear, check the top left corner of the window and make sure it says “PowerShell” and not “Bash”; otherwise, switch to “PowerShell”. Copy paste the command above and fill out the necessary information in between the “&amp;lt;” and “&amp;gt;”, then press enter.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/AppService/media/2021/09/Cloud-Shell-Transfer-Out.png&quot; alt=&quot;Cloud Shell Transfer Out&quot; class=&quot;align-center&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Refer to the “authCode” value without the double quotes (“). This will be the authorization code you will need to provide the new domain registrar to transfer your domain out.&lt;/p&gt;
+
+&lt;h2 id=&quot;transfering-domain-in&quot;&gt;Transfering domain in&lt;/h2&gt;
+
+&lt;p&gt;Transfering of domain into Azure is currently not supported. Any attempts made to transfer the domain into Azure risks getting the domain into a broken state. We will not be providing support to fix domains caught in this broken state due to unsupported transfer in scenario.&lt;/p&gt;</content><author><name>Azure App Service</name></author><category term="certsdomains" /><summary type="html">App Service Domain is a domain resource on Azure which integrates with Azure DNS. This allows you to manage all your resources on Azure for when you need to get your web app up and running.</summary></entry></feed>
